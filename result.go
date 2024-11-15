@@ -184,9 +184,16 @@ func (r *Result) AddWarning(fmtMsg string, a ...interface{}) Result {
 	return *r
 }
 
-// AddErrorf adds a formatted error message and returns itself
+// AddError adds a formatted error message and returns itself
 func (r *Result) AddError(fmtMsg string, a ...interface{}) Result {
 	r.ln.AddError(fmt.Sprintf(fmtMsg, a...))
+	r.updateMessage()
+	return *r
+}
+
+// AddSuccess adds a formatted error message and returns itself
+func (r *Result) AddSuccess(fmtMsg string, a ...interface{}) Result {
+	r.ln.AddSuccess(fmt.Sprintf(fmtMsg, a...))
 	r.updateMessage()
 	return *r
 }
@@ -358,6 +365,15 @@ func (r *ResultAny[T]) AddError(fmtMsg string, a ...interface{}) ResultAny[T] {
 // AddErr adds a error-typed value and returns itself.
 func (r *ResultAny[T]) AddErr(err error) ResultAny[T] {
 	r.Result.AddErr(err)
+	return ResultAny[T]{
+		Result: r.Result,
+		Data:   r.Data,
+	}
+}
+
+// AddSuccess adds an error message and returns itself
+func (r *ResultAny[T]) AddSuccess(fmtMsg string, a ...interface{}) ResultAny[T] {
+	r.Result.AddSuccess(fmtMsg, a...)
 	return ResultAny[T]{
 		Result: r.Result,
 		Data:   r.Data,
