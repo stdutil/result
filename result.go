@@ -12,9 +12,6 @@ import (
 	"github.com/stdutil/log"
 )
 
-// Status type
-type Status string
-
 // Status items
 const (
 	OK        Status = `OK`
@@ -26,6 +23,7 @@ const (
 )
 
 type (
+	Status string
 	// Result - standard result structure
 	Result struct {
 		Messages     []string     `json:"messages"`                // Accumulated messages as a result from Add methods. Do not append messages using append()
