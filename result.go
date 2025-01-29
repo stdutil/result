@@ -26,20 +26,21 @@ type (
 	Status string
 	// Result - standard result structure
 	Result struct {
-		Messages     []string     `json:"messages"`                // Accumulated messages as a result from Add methods. Do not append messages using append()
-		Status       string       `json:"status"`                  // OK, ERROR, VALID or any status
-		Operation    string       `json:"operation,omitempty"`     // Name of the operation / function that returned the result
-		TaskID       *string      `json:"task_id,omitempty"`       // ID of the task and of the result
-		WorkerID     *string      `json:"worker_id,omitempty"`     // ID of the worker that processed the data
-		FocusControl *string      `json:"focus_control,omitempty"` // Control to focus when error was activated
-		Page         *int         `json:"page,omitempty"`          // Current Page
-		PageCount    *int         `json:"page_count,omitempty"`    // Page Count
-		PageSize     *int         `json:"page_size,omitempty"`     // Page Size
-		Tag          *interface{} `json:"tag,omitempty"`           // Miscellaneous result
-		Prefix       string       `json:"prefix,omitempty"`        // Prefix of the message to return
-		ln           log.Log      // Internal note
-		eventVerb    string       // event verb related to the name of the operation
-		osIsWin      bool
+		Messages          []string     `json:"messages"`                // Accumulated messages as a result from Add methods. Do not append messages using append()
+		Status            string       `json:"status"`                  // OK, ERROR, VALID or any status
+		Operation         string       `json:"operation,omitempty"`     // Name of the operation / function that returned the result
+		TaskID            *string      `json:"task_id,omitempty"`       // ID of the task and of the result
+		WorkerID          *string      `json:"worker_id,omitempty"`     // ID of the worker that processed the data
+		FocusControl      *string      `json:"focus_control,omitempty"` // Control to focus when error was activated
+		Page              *int         `json:"page,omitempty"`          // Current Page
+		PageCount         *int         `json:"page_count,omitempty"`    // Page Count
+		PageSize          *int         `json:"page_size,omitempty"`     // Page Size
+		Tag               *interface{} `json:"tag,omitempty"`           // Miscellaneous result
+		Prefix            string       `json:"prefix,omitempty"`        // Prefix of the message to return
+		ln                log.Log      // Internal note
+		eventVerb         string       // event verb related to the name of the operation
+		osIsWin           bool         // checks for OS to determine carriage return line feed
+		useOperationInMsg bool         // use Operation value in messages
 	}
 	// ResultAny struct with generic type data
 	ResultAny[T any] struct {
@@ -48,9 +49,11 @@ type (
 	}
 	// InitResultParam are optional parameters for initiating a Result
 	InitResultParam struct {
-		Status  Status // Initial status
-		Prefix  string // Prefix
-		Message string // Message
+		Status            Status // Initial status
+		Prefix            string // Prefix
+		Message           string // Message
+		FocusControl      string // FocusControl
+		UseOperationInMsg bool   // Use Operation tag in messages
 	}
 	// InitResultOption for initial result parameters
 	InitResultOption func(opt *InitResultParam) error
@@ -80,6 +83,22 @@ func WithMessage(message string) InitResultOption {
 	}
 }
 
+// WithMessage sets the message of the Result as an option
+func WithFocusControl(focusId string) InitResultOption {
+	return func(irp *InitResultParam) error {
+		irp.FocusControl = focusId
+		return nil
+	}
+}
+
+// UseOperationInMessage sets to include the Operation tag in messages
+func UseOperationInMessage(on bool) InitResultOption {
+	return func(irp *InitResultParam) error {
+		irp.UseOperationInMsg = on
+		return nil
+	}
+}
+
 // InitResult - initialize result for API query. This is the recommended initialization of this object.
 // The variadic arguments of InitResultOption will modify default status.
 // Depending on the current status (default is EXCEPTION), the message type is automatically set to that type
@@ -101,16 +120,6 @@ func InitResult(opts ...InitResultOption) Result {
 		res.Status = string(irp.Status)
 	}
 	res.SetPrefix(irp.Prefix)
-	if irp.Message != "" {
-		switch irp.Status {
-		case OK, VALID, YES:
-			res.AddInfo(irp.Message)
-		case EXCEPTION, INVALID, NO:
-			res.AddError(irp.Message)
-		default:
-			res.ln.AddAppMsg(irp.Message)
-		}
-	}
 
 	// Auto-detect function that called this function
 	if pc, _, _, ok := runtime.Caller(1); ok {
@@ -121,6 +130,21 @@ func InitResult(opts ...InitResultOption) Result {
 			}
 			res.Operation = strings.ToLower(nm)
 			res.eventVerb = res.Operation
+		}
+	}
+
+	if irp.Message != "" {
+		msg := fmt.Sprintf("%s", irp.Message)
+		if irp.UseOperationInMsg && res.Operation != "" {
+			msg = fmt.Sprintf(" %s: %s", res.Operation, irp.Message)
+		}
+		switch irp.Status {
+		case OK, VALID, YES:
+			res.AddInfo("%s", msg)
+		case EXCEPTION, INVALID, NO:
+			res.AddError("%s", msg)
+		default:
+			res.ln.AddAppMsg(msg)
 		}
 	}
 
@@ -170,40 +194,56 @@ func (r *Result) No() bool {
 
 // AddInfo adds a formatted information message and returns itself
 func (r *Result) AddInfo(fmtMsg string, a ...interface{}) Result {
-	r.ln.AddInfo(fmt.Sprintf(fmtMsg, a...))
+	msg := fmt.Sprintf("%s", a...)
+	if r.useOperationInMsg && r.Operation != "" {
+		msg = fmt.Sprintf(" %s: ", r.Operation) + msg
+	}
+	r.ln.AddInfo(msg)
 	r.updateMessage()
 	return *r
 }
 
 // AddWarning adds a formatted warning message and returns itself
 func (r *Result) AddWarning(fmtMsg string, a ...interface{}) Result {
-	r.ln.AddWarning(fmt.Sprintf(fmtMsg, a...))
+	msg := fmt.Sprintf("%s", a...)
+	if r.useOperationInMsg && r.Operation != "" {
+		msg = fmt.Sprintf(" %s: ", r.Operation) + msg
+	}
+	r.ln.AddWarning(msg)
 	r.updateMessage()
 	return *r
 }
 
 // AddError adds a formatted error message and returns itself
 func (r *Result) AddError(fmtMsg string, a ...interface{}) Result {
-	r.ln.AddError(fmt.Sprintf(fmtMsg, a...))
+	msg := fmt.Sprintf("%s", a...)
+	if r.useOperationInMsg && r.Operation != "" {
+		msg = fmt.Sprintf(" %s: ", r.Operation) + msg
+	}
+	r.ln.AddError(msg)
 	r.updateMessage()
 	return *r
 }
 
 // AddErr adds a error-typed value and returns itself.
 func (r *Result) AddErr(err error) Result {
-	r.AddError(err.Error())
+	r.AddError("%s", err)
 	return *r
 }
 
 // AddSuccess adds a formatted success message and returns itself
 func (r *Result) AddSuccess(fmtMsg string, a ...interface{}) Result {
-	r.ln.AddSuccess(fmt.Sprintf(fmtMsg, a...))
+	msg := fmt.Sprintf("%s", a...)
+	if r.useOperationInMsg && r.Operation != "" {
+		msg = fmt.Sprintf(" %s: ", r.Operation) + msg
+	}
+	r.ln.AddSuccess(msg)
 	r.updateMessage()
 	return *r
 }
 
-// AddAppMsg adds a formatted application message and returns itself
-func (r *Result) AddAppMsg(fmtMsg string, a ...interface{}) Result {
+// AddRawMsg adds a formatted application message and returns itself
+func (r *Result) AddRawMsg(fmtMsg string, a ...interface{}) Result {
 	r.ln.AddAppMsg(fmt.Sprintf(fmtMsg, a...))
 	r.updateMessage()
 	return *r
@@ -298,7 +338,7 @@ func (r *Result) EventID() string {
 	return ev + "d"
 }
 
-// ToString adds a formatted error message and returns itself
+// MessagesToString returns all errors in a string separated by carriage return and/or line feed
 func (r *Result) MessagesToString() string {
 	// if r.Messages is not empty, it can be because it was unmarshalled from result bytes
 	if len(r.Messages) > 0 {
@@ -332,7 +372,7 @@ func (r *Result) RowsAffectedInfo(rowsaff int64) {
 }
 
 func (r *Result) updateMessage() {
-	// get current notes to update the messages
+	// get current notes to update the messages array
 	nts := r.ln.Notes()
 	r.Messages = make([]string, 0, len(nts))
 	for _, n := range nts {
