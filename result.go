@@ -194,7 +194,10 @@ func (r *Result) No() bool {
 
 // AddInfo adds a formatted information message and returns itself
 func (r *Result) AddInfo(fmtMsg string, a ...interface{}) Result {
-	msg := fmt.Sprintf("%s", a...)
+	msg := fmtMsg
+	if len(a) > 0 {
+		msg = fmt.Sprintf(fmtMsg, a...)
+	}
 	if r.useOperationInMsg && r.Operation != "" {
 		msg = fmt.Sprintf(" %s: ", r.Operation) + msg
 	}
@@ -205,7 +208,10 @@ func (r *Result) AddInfo(fmtMsg string, a ...interface{}) Result {
 
 // AddWarning adds a formatted warning message and returns itself
 func (r *Result) AddWarning(fmtMsg string, a ...interface{}) Result {
-	msg := fmt.Sprintf("%s", a...)
+	msg := fmtMsg
+	if len(a) > 0 {
+		msg = fmt.Sprintf(fmtMsg, a...)
+	}
 	if r.useOperationInMsg && r.Operation != "" {
 		msg = fmt.Sprintf(" %s: ", r.Operation) + msg
 	}
@@ -216,7 +222,10 @@ func (r *Result) AddWarning(fmtMsg string, a ...interface{}) Result {
 
 // AddError adds a formatted error message and returns itself
 func (r *Result) AddError(fmtMsg string, a ...interface{}) Result {
-	msg := fmt.Sprintf("%s", a...)
+	msg := fmtMsg
+	if len(a) > 0 {
+		msg = fmt.Sprintf(fmtMsg, a...)
+	}
 	if r.useOperationInMsg && r.Operation != "" {
 		msg = fmt.Sprintf(" %s: ", r.Operation) + msg
 	}
@@ -233,7 +242,10 @@ func (r *Result) AddErr(err error) Result {
 
 // AddSuccess adds a formatted success message and returns itself
 func (r *Result) AddSuccess(fmtMsg string, a ...interface{}) Result {
-	msg := fmt.Sprintf("%s", a...)
+	msg := fmtMsg
+	if len(a) > 0 {
+		msg = fmt.Sprintf(fmtMsg, a...)
+	}
 	if r.useOperationInMsg && r.Operation != "" {
 		msg = fmt.Sprintf(" %s: ", r.Operation) + msg
 	}
@@ -244,7 +256,11 @@ func (r *Result) AddSuccess(fmtMsg string, a ...interface{}) Result {
 
 // AddRawMsg adds a formatted application message and returns itself
 func (r *Result) AddRawMsg(fmtMsg string, a ...interface{}) Result {
-	r.ln.AddAppMsg(fmt.Sprintf(fmtMsg, a...))
+	msg := fmtMsg
+	if len(a) > 0 {
+		msg = fmt.Sprintf(fmtMsg, a...)
+	}
+	r.ln.AddAppMsg(msg)
 	r.updateMessage()
 	return *r
 }
@@ -365,7 +381,7 @@ func (r *Result) SetPrefix(pfx string) {
 // RowsAffectedInfo - a function to simplify adding information for rows affected
 func (r *Result) RowsAffectedInfo(rowsaff int64) {
 	if rowsaff != 0 {
-		r.AddInfo(fmt.Sprintf("%d rows affected", rowsaff))
+		r.AddInfo("%d rows affected", rowsaff)
 	} else {
 		r.AddInfo("No rows affected")
 	}
