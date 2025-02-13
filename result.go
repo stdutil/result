@@ -356,8 +356,11 @@ func (r *Result) EventID() string {
 
 // MessagesToString returns all errors in a string separated by carriage return and/or line feed
 func (r *Result) MessagesToString() string {
-	// if r.Messages is not empty, it can be because it was unmarshalled from result bytes
-	if len(r.Messages) > 0 {
+	// The r.Messages might have been unmarshalled from result bytes so we should process.
+	if len(r.Messages) == 1 {
+		return r.Messages[0]
+	}
+	if len(r.Messages) > 1 {
 		lf := "\n"
 		if r.osIsWin {
 			lf = "\r\n"
