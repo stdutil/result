@@ -22,83 +22,6 @@ const (
 	NO        Status = `NO`
 )
 
-type (
-	Status string
-	// Result - standard result structure
-	Result struct {
-		Messages          []string     `json:"messages"`                // Accumulated messages as a result from Add methods. Do not append messages using append()
-		Status            string       `json:"status"`                  // OK, ERROR, VALID or any status
-		Operation         string       `json:"operation,omitempty"`     // Name of the operation / function that returned the result
-		TaskID            *string      `json:"task_id,omitempty"`       // ID of the task and of the result
-		WorkerID          *string      `json:"worker_id,omitempty"`     // ID of the worker that processed the data
-		FocusControl      *string      `json:"focus_control,omitempty"` // Control to focus when error was activated
-		Page              *int         `json:"page,omitempty"`          // Current Page
-		PageCount         *int         `json:"page_count,omitempty"`    // Page Count
-		PageSize          *int         `json:"page_size,omitempty"`     // Page Size
-		Tag               *interface{} `json:"tag,omitempty"`           // Miscellaneous result
-		Prefix            string       `json:"prefix,omitempty"`        // Prefix of the message to return
-		ln                log.Log      // Internal note
-		eventVerb         string       // event verb related to the name of the operation
-		osIsWin           bool         // checks for OS to determine carriage return line feed
-		useOperationInMsg bool         // use Operation value in messages
-	}
-	// ResultAny struct with generic type data
-	ResultAny[T any] struct {
-		Result
-		Data T `json:"data"`
-	}
-	// InitResultParam are optional parameters for initiating a Result
-	InitResultParam struct {
-		Status            Status // Initial status
-		Prefix            string // Prefix
-		Message           string // Message
-		FocusControl      string // FocusControl
-		UseOperationInMsg bool   // Use Operation tag in messages
-	}
-	// InitResultOption for initial result parameters
-	InitResultOption func(opt *InitResultParam) error
-)
-
-// WithStatus sets the status of the Result as an option
-func WithStatus(status Status) InitResultOption {
-	return func(irp *InitResultParam) error {
-		irp.Status = status
-		return nil
-	}
-}
-
-// WithPrefix sets the prefix of the Result as an option
-func WithPrefix(prefix string) InitResultOption {
-	return func(irp *InitResultParam) error {
-		irp.Prefix = prefix
-		return nil
-	}
-}
-
-// WithMessage sets the message of the Result as an option
-func WithMessage(message string) InitResultOption {
-	return func(irp *InitResultParam) error {
-		irp.Message = message
-		return nil
-	}
-}
-
-// WithMessage sets the message of the Result as an option
-func WithFocusControl(focusId string) InitResultOption {
-	return func(irp *InitResultParam) error {
-		irp.FocusControl = focusId
-		return nil
-	}
-}
-
-// UseOperationInMessage sets to include the Operation tag in messages
-func UseOperationInMessage(on bool) InitResultOption {
-	return func(irp *InitResultParam) error {
-		irp.UseOperationInMsg = on
-		return nil
-	}
-}
-
 // InitResult - initialize result for API query. This is the recommended initialization of this object.
 // The variadic arguments of InitResultOption will modify default status.
 // Depending on the current status (default is EXCEPTION), the message type is automatically set to that type
@@ -120,6 +43,8 @@ func InitResult(opts ...InitResultOption) Result {
 		res.Status = string(irp.Status)
 	}
 	res.SetPrefix(irp.Prefix)
+	res.initFc = irp.FocusControl // preserve initial focus control
+	res.SetFocusControl(irp.FocusControl, false)
 
 	// Auto-detect function that called this function
 	if pc, _, _, ok := runtime.Caller(1); ok {
@@ -134,7 +59,7 @@ func InitResult(opts ...InitResultOption) Result {
 	}
 
 	if irp.Message != "" {
-		msg := fmt.Sprintf("%s", irp.Message)
+		msg := irp.Message
 		if irp.UseOperationInMsg && res.Operation != "" {
 			msg = fmt.Sprintf(" %s: %s", res.Operation, irp.Message)
 		}
@@ -381,6 +306,27 @@ func (r *Result) SetPrefix(pfx string) {
 	r.Prefix = pfx
 }
 
+// SetFocusControl sets the control to focus when an issue is encountered
+//
+// When appendOnly is true, it only appends to the present FocusControl field
+// To reset the focus control, call ResetFocusControl method
+func (r *Result) SetFocusControl(ctrl string, appendOnly bool) {
+	if r.FocusControl == nil {
+		r.FocusControl = new(string)
+	}
+	if !appendOnly {
+		r.initFc = ctrl
+		r.FocusControl = &ctrl
+		return
+	}
+	*r.FocusControl = r.initFc + "_" + ctrl
+}
+
+// ResetFocusControl resets the focus control to the initial value
+func (r *Result) ResetFocusControl() {
+	r.FocusControl = &r.initFc
+}
+
 // RowsAffectedInfo - a function to simplify adding information for rows affected
 func (r *Result) RowsAffectedInfo(rowsaff int64) {
 	if rowsaff != 0 {
@@ -396,88 +342,5 @@ func (r *Result) updateMessage() {
 	r.Messages = make([]string, 0, len(nts))
 	for _, n := range nts {
 		r.Messages = append(r.Messages, n.ToString())
-	}
-}
-
-// AddInfo adds an information message and returns itself
-func (r *ResultAny[T]) AddInfo(fmtMsg string, a ...interface{}) ResultAny[T] {
-	r.Result.AddInfo(fmtMsg, a...)
-	return ResultAny[T]{
-		Result: r.Result,
-		Data:   r.Data,
-	}
-}
-
-// AddWarning adds a warning message and returns itself
-func (r *ResultAny[T]) AddWarning(fmtMsg string, a ...interface{}) ResultAny[T] {
-	r.Result.AddWarning(fmtMsg, a...)
-	return ResultAny[T]{
-		Result: r.Result,
-		Data:   r.Data,
-	}
-}
-
-// AddError adds an error message and returns itself
-func (r *ResultAny[T]) AddError(fmtMsg string, a ...interface{}) ResultAny[T] {
-	r.Result.AddError(fmtMsg, a...)
-	return ResultAny[T]{
-		Result: r.Result,
-		Data:   r.Data,
-	}
-}
-
-// AddErr adds a error-typed value and returns itself.
-func (r *ResultAny[T]) AddErr(err error) ResultAny[T] {
-	r.Result.AddErr(err)
-	return ResultAny[T]{
-		Result: r.Result,
-		Data:   r.Data,
-	}
-}
-
-// AddSuccess adds an success message and returns itself
-func (r *ResultAny[T]) AddSuccess(fmtMsg string, a ...interface{}) ResultAny[T] {
-	r.Result.AddSuccess(fmtMsg, a...)
-	return ResultAny[T]{
-		Result: r.Result,
-		Data:   r.Data,
-	}
-}
-
-// Stuff adds or appends the messages of a Result.
-func (r *ResultAny[T]) Stuff(rs Result) ResultAny[T] {
-	r.Result.Stuff(rs)
-	return ResultAny[T]{
-		Result: r.Result,
-		Data:   r.Data,
-	}
-}
-
-// AddErrWithAlt adds an error-typed value, and an alternate error
-// message if the err happens to be nil. It returns itself.
-func (r *ResultAny[T]) AddErrWithAlt(err error, altMsg string, altMsgValues ...any) ResultAny[T] {
-	r.Result.AddErrWithAlt(err, altMsg, altMsgValues...)
-	return ResultAny[T]{
-		Result: r.Result,
-		Data:   r.Data,
-	}
-}
-
-// AddErrorWithAlt appends the messages of a Result.
-// And an alternative message if the Result is other than OK or VALID status.
-func (r *ResultAny[T]) AddErrorWithAlt(rs Result, altMsg string, altMsgValues ...any) ResultAny[T] {
-	r.Result.AddErrorWithAlt(rs, altMsg, altMsgValues...)
-	return ResultAny[T]{
-		Result: r.Result,
-		Data:   r.Data,
-	}
-}
-
-// Return sets the current status of a result
-func (r *ResultAny[T]) Return(status Status) ResultAny[T] {
-	r.Result.Return(status)
-	return ResultAny[T]{
-		Result: r.Result,
-		Data:   r.Data,
 	}
 }
