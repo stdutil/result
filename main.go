@@ -30,6 +30,7 @@ type (
 	}
 	// InitResultParam are optional parameters for initiating a Result
 	InitResultParam struct {
+		EventVerb         string // Custom event verb or id
 		Status            Status // Initial status
 		Prefix            string // Prefix
 		Message           string // Message
@@ -50,25 +51,33 @@ func WithStatus(status Status) InitResultOption {
 }
 
 // WithPrefix sets the prefix of the Result as an option
-func WithPrefix(prefix string) InitResultOption {
+func WithPrefix(pfx string) InitResultOption {
 	return func(irp *InitResultParam) error {
-		irp.Prefix = prefix
+		irp.Prefix = pfx
 		return nil
 	}
 }
 
 // WithMessage sets the message of the Result as an option
-func WithMessage(message string) InitResultOption {
+func WithMessage(msg string) InitResultOption {
 	return func(irp *InitResultParam) error {
-		irp.Message = message
+		irp.Message = msg
 		return nil
 	}
 }
 
-// WithMessage sets the message of the Result as an option
+// WithFocusControl sets the message of the Result as an option
 func WithFocusControl(focusId string) InitResultOption {
 	return func(irp *InitResultParam) error {
 		irp.InitialFocusID = focusId
+		return nil
+	}
+}
+
+// WithEventVerb sets the custom event verb of the Result as an option
+func WithEventVerb(eventVerb string) InitResultOption {
+	return func(irp *InitResultParam) error {
+		irp.EventVerb = eventVerb
 		return nil
 	}
 }

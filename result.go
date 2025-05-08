@@ -43,6 +43,7 @@ func InitResult(opts ...InitResultOption) Result {
 		res.Status = string(irp.Status)
 	}
 	res.SetPrefix(irp.Prefix)
+	res.eventVerb = irp.EventVerb
 	res.initFc = irp.FocusControl // preserve initial focus control
 	res.SetFocusControl(irp.FocusControl, false)
 
@@ -54,7 +55,9 @@ func InitResult(opts ...InitResultOption) Result {
 				nm = nm[pos+1:]
 			}
 			res.Operation = strings.ToLower(nm)
-			res.eventVerb = res.Operation
+			if res.eventVerb == "" {
+				res.eventVerb = res.Operation
+			}
 		}
 	}
 
