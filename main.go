@@ -34,7 +34,6 @@ type (
 		Status            Status // Initial status
 		Prefix            string // Prefix
 		Message           string // Message
-		FocusControl      string // FocusControl
 		InitialFocusID    string // Initial Focus Control id
 		UseOperationInMsg bool   // Use Operation tag in messages
 	}

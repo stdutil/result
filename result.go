@@ -44,8 +44,8 @@ func InitResult(opts ...InitResultOption) Result {
 	}
 	res.SetPrefix(irp.Prefix)
 	res.eventVerb = irp.EventVerb
-	res.initFc = irp.FocusControl // preserve initial focus control
-	res.SetFocusControl(irp.FocusControl, false)
+	res.initFc = irp.InitialFocusID // preserve initial focus control
+	res.SetFocusControl(res.initFc, false)
 
 	// Auto-detect function that called this function
 	if pc, _, _, ok := runtime.Caller(1); ok {
