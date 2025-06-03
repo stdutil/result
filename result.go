@@ -72,7 +72,7 @@ func InitResult(opts ...InitResultOption) Result {
 		case EXCEPTION, INVALID, NO:
 			res.AddError("%s", msg)
 		default:
-			res.ln.AddAppMsg(msg)
+			res.AddRawMsg("%s", msg)
 		}
 	}
 
