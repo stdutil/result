@@ -121,7 +121,7 @@ func (r *Result) No() bool {
 }
 
 // AddInfo adds a formatted information message and returns itself
-func (r *Result) AddInfo(fmtMsg string, a ...interface{}) Result {
+func (r *Result) AddInfo(fmtMsg string, a ...any) Result {
 	msg := fmtMsg
 	if len(a) > 0 {
 		msg = fmt.Sprintf(fmtMsg, a...)
@@ -135,7 +135,7 @@ func (r *Result) AddInfo(fmtMsg string, a ...interface{}) Result {
 }
 
 // AddWarning adds a formatted warning message and returns itself
-func (r *Result) AddWarning(fmtMsg string, a ...interface{}) Result {
+func (r *Result) AddWarning(fmtMsg string, a ...any) Result {
 	msg := fmtMsg
 	if len(a) > 0 {
 		msg = fmt.Sprintf(fmtMsg, a...)
@@ -149,7 +149,7 @@ func (r *Result) AddWarning(fmtMsg string, a ...interface{}) Result {
 }
 
 // AddError adds a formatted error message and returns itself
-func (r *Result) AddError(fmtMsg string, a ...interface{}) Result {
+func (r *Result) AddError(fmtMsg string, a ...any) Result {
 	msg := fmtMsg
 	if len(a) > 0 {
 		msg = fmt.Sprintf(fmtMsg, a...)
@@ -169,7 +169,7 @@ func (r *Result) AddErr(err error) Result {
 }
 
 // AddSuccess adds a formatted success message and returns itself
-func (r *Result) AddSuccess(fmtMsg string, a ...interface{}) Result {
+func (r *Result) AddSuccess(fmtMsg string, a ...any) Result {
 	msg := fmtMsg
 	if len(a) > 0 {
 		msg = fmt.Sprintf(fmtMsg, a...)
@@ -183,7 +183,7 @@ func (r *Result) AddSuccess(fmtMsg string, a ...interface{}) Result {
 }
 
 // AddRawMsg adds a formatted application message and returns itself
-func (r *Result) AddRawMsg(fmtMsg string, a ...interface{}) Result {
+func (r *Result) AddRawMsg(fmtMsg string, a ...any) Result {
 	msg := fmtMsg
 	if len(a) > 0 {
 		msg = fmt.Sprintf(fmtMsg, a...)
@@ -237,7 +237,7 @@ func (r *Result) AppendErr(rs Result, err error) Result {
 }
 
 // AppendErrorf copies the messages of the Result parameter and append a formatted error message
-func (r *Result) AppendError(rs Result, fmtMsg string, a ...interface{}) Result {
+func (r *Result) AppendError(rs Result, fmtMsg string, a ...any) Result {
 	for _, n := range rs.ln.Notes() {
 		r.ln.Append(n)
 	}
@@ -245,7 +245,7 @@ func (r *Result) AppendError(rs Result, fmtMsg string, a ...interface{}) Result 
 }
 
 // AppendInfof copies the messages of the Result parameter and append a formatted information message
-func (r *Result) AppendInfo(rs Result, fmtMsg string, a ...interface{}) Result {
+func (r *Result) AppendInfo(rs Result, fmtMsg string, a ...any) Result {
 	for _, n := range rs.ln.Notes() {
 		r.ln.Append(n)
 	}
@@ -253,7 +253,7 @@ func (r *Result) AppendInfo(rs Result, fmtMsg string, a ...interface{}) Result {
 }
 
 // AppendWarning copies the messages of the Result parameter and append a formatted warning message
-func (r *Result) AppendWarning(rs Result, fmtMsg string, a ...interface{}) Result {
+func (r *Result) AppendWarning(rs Result, fmtMsg string, a ...any) Result {
 	for _, n := range rs.ln.Notes() {
 		r.ln.Append(n)
 	}
