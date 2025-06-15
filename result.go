@@ -282,7 +282,7 @@ func (r *Result) EventID() string {
 	return ev + "d"
 }
 
-// MessagesToString returns all errors in a string separated by carriage return and/or line feed
+// MessagesToString returns all messages in a string separated by carriage return and/or line feed
 func (r *Result) MessagesToString() string {
 	// The r.Messages might have been unmarshalled from result bytes so we should process.
 	if len(r.Messages) == 1 {
