@@ -1,4 +1,2 @@
-github.com/stdutil/log v0.0.0-20241115150827-18730e91d3ec h1:xcocD99ZQV3R1HGhZYJuVbChDetDkYRmAdMpDHFVR4c=
-github.com/stdutil/log v0.0.0-20241115150827-18730e91d3ec/go.mod h1:wDyk7xCaS2MfSoWfBpTL0db/gyOvjM11hiCcFCc1mKE=
-github.com/stdutil/log v0.0.0-20250607021058-a8a624014944 h1:cIXGe02zJM+XjmT2R5b2roGOt/c5mNxLNLgbN0eMOzY=
-github.com/stdutil/log v0.0.0-20250607021058-a8a624014944/go.mod h1:wDyk7xCaS2MfSoWfBpTL0db/gyOvjM11hiCcFCc1mKE=
+github.com/stdutil/log v0.1.0 h1:Bdx79qxjYcw7hi18dZ/KYrDNP2y7qX1k9ruyNXbpVMo=
+github.com/stdutil/log v0.1.0/go.mod h1:wDyk7xCaS2MfSoWfBpTL0db/gyOvjM11hiCcFCc1mKE=
