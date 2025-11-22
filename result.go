@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/stdutil/log"
+	l "github.com/stdutil/log"
 )
 
 // Status items
@@ -28,7 +28,7 @@ const (
 func InitResult(opts ...InitResultOption) Result {
 	res := Result{
 		Status:  string(EXCEPTION),
-		ln:      log.Log{},
+		ln:      l.Log{},
 		osIsWin: runtime.GOOS == "windows",
 	}
 	res.Messages = make([]string, 0)
@@ -80,7 +80,7 @@ func InitResult(opts ...InitResultOption) Result {
 }
 
 // MessageManager returns the internal message manager
-func (r *Result) MessageManager() *log.Log {
+func (r *Result) MessageManager() *l.Log {
 	return &r.ln
 }
 
@@ -219,8 +219,8 @@ func (r *Result) AddErrorWithAlt(rs Result, altMsg string, altMsgValues ...any) 
 		return *r
 	}
 	r.ln.Append(
-		log.LogInfo{
-			Type:    log.Error,
+		l.LogInfo{
+			Type:    l.Error,
 			Message: fmt.Sprintf(altMsg, altMsgValues...),
 			Prefix:  r.ln.Prefix,
 		})
