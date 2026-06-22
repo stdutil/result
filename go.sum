@@ -2,3 +2,5 @@ github.com/stdutil/log v0.1.0 h1:Bdx79qxjYcw7hi18dZ/KYrDNP2y7qX1k9ruyNXbpVMo=
 github.com/stdutil/log v0.1.0/go.mod h1:wDyk7xCaS2MfSoWfBpTL0db/gyOvjM11hiCcFCc1mKE=
 github.com/stdutil/log v0.1.1 h1:eaOmvYZIp6HY/p/3E85NkIopvEU3SnsFLydG5zjoKz4=
 github.com/stdutil/log v0.1.1/go.mod h1:wDyk7xCaS2MfSoWfBpTL0db/gyOvjM11hiCcFCc1mKE=
+github.com/stdutil/log v0.1.3 h1:rCOLeUjmR6R2nbk4D3F06ypkIBQMRICJ8p3ew9k+2Cw=
+github.com/stdutil/log v0.1.3/go.mod h1:wDyk7xCaS2MfSoWfBpTL0db/gyOvjM11hiCcFCc1mKE=

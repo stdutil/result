@@ -42,6 +42,7 @@ func InitResult(opts ...InitResultOption) Result {
 	if irp.Status != "" {
 		res.Status = string(irp.Status)
 	}
+	irp.Status = Status(res.Status)
 	res.SetPrefix(irp.Prefix)
 	res.eventVerb = irp.EventVerb
 	res.initFc = irp.InitialFocusID // preserve initial focus control
