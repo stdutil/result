@@ -91,6 +91,15 @@ func (r *Result) Return(status Status) Result {
 	return *r
 }
 
+// ReturnResult copies the messages of a Result and returns it.
+func (r *Result) ReturnResult(rs Result) Result {
+	for _, n := range rs.ln.Notes() {
+		r.ln.Append(n)
+	}
+	r.updateMessage()
+	return *r
+}
+
 // ReturnWithMsg sets the current status of a result with a message
 func (r *Result) ReturnWithMsg(status Status, typ l.LogType, fmtMsg string, a ...any) Result {
 	li := l.LogInfo{
@@ -220,7 +229,7 @@ func (r *Result) AddErrWithAlt(err error, altMsg string, altMsgValues ...any) Re
 }
 
 // AddErrorWithAlt appends the messages of a Result.
-// And an alternative message if the Result is other than OK or VALID status.
+// Adds an alternative message if the Result is other than OK or VALID status.
 func (r *Result) AddErrorWithAlt(rs Result, altMsg string, altMsgValues ...any) Result {
 	if !(rs.OK() || rs.Valid()) {
 		for _, n := range rs.ln.Notes() {
@@ -275,6 +284,8 @@ func (r *Result) AppendWarning(rs Result, fmtMsg string, a ...any) Result {
 }
 
 // Stuff adds or appends the messages of a Result.
+//
+// Deprecated: Use ReturnResult instead for consistency of return naming
 func (r *Result) Stuff(rs Result) Result {
 	for _, n := range rs.ln.Notes() {
 		r.ln.Append(n)

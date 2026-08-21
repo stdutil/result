@@ -48,6 +48,8 @@ func (r *ResultAny[T]) AddSuccess(fmtMsg string, a ...interface{}) ResultAny[T] 
 }
 
 // Stuff adds or appends the messages of a Result.
+//
+// Deprecated: Use ReturnResult instead for consistency of return naming
 func (r *ResultAny[T]) Stuff(rs Result) ResultAny[T] {
 	r.Result.Stuff(rs)
 	return ResultAny[T]{
@@ -67,7 +69,7 @@ func (r *ResultAny[T]) AddErrWithAlt(err error, altMsg string, altMsgValues ...a
 }
 
 // AddErrorWithAlt appends the messages of a Result.
-// And an alternative message if the Result is other than OK or VALID status.
+// Adds an alternative message if the Result is other than OK or VALID status.
 func (r *ResultAny[T]) AddErrorWithAlt(rs Result, altMsg string, altMsgValues ...any) ResultAny[T] {
 	r.Result.AddErrorWithAlt(rs, altMsg, altMsgValues...)
 	return ResultAny[T]{
@@ -79,6 +81,15 @@ func (r *ResultAny[T]) AddErrorWithAlt(rs Result, altMsg string, altMsgValues ..
 // Return sets the current status of a result
 func (r *ResultAny[T]) Return(status Status) ResultAny[T] {
 	r.Result.Return(status)
+	return ResultAny[T]{
+		Result: r.Result,
+		Data:   r.Data,
+	}
+}
+
+// ReturnResult copies the messages of a Result and returns it.
+func (r *ResultAny[T]) ReturnResult(rs Result) ResultAny[T] {
+	r.Result.ReturnResult(rs)
 	return ResultAny[T]{
 		Result: r.Result,
 		Data:   r.Data,
