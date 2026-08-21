@@ -1,5 +1,7 @@
 package result
 
+import l "github.com/stdutil/log"
+
 // AddInfo adds an information message and returns itself
 func (r *ResultAny[T]) AddInfo(fmtMsg string, a ...interface{}) ResultAny[T] {
 	r.Result.AddInfo(fmtMsg, a...)
@@ -77,6 +79,15 @@ func (r *ResultAny[T]) AddErrorWithAlt(rs Result, altMsg string, altMsgValues ..
 // Return sets the current status of a result
 func (r *ResultAny[T]) Return(status Status) ResultAny[T] {
 	r.Result.Return(status)
+	return ResultAny[T]{
+		Result: r.Result,
+		Data:   r.Data,
+	}
+}
+
+// ReturnWithMsg sets the current status of a result with a message
+func (r *ResultAny[T]) ReturnWithMsg(status Status, typ l.LogType, fmtMsg string, a ...any) ResultAny[T] {
+	r.Result.ReturnWithMsg(status, typ, fmtMsg, a...)
 	return ResultAny[T]{
 		Result: r.Result,
 		Data:   r.Data,

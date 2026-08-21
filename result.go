@@ -91,6 +91,19 @@ func (r *Result) Return(status Status) Result {
 	return *r
 }
 
+// ReturnWithMsg sets the current status of a result with a message
+func (r *Result) ReturnWithMsg(status Status, typ l.LogType, fmtMsg string, a ...any) Result {
+	li := l.LogInfo{
+		Type:    typ,
+		Message: l.Fmt(fmtMsg, a...),
+		Prefix:  r.Prefix,
+	}
+	r.ln.Append(li)
+	r.updateMessage()
+	r.Status = string(status)
+	return *r
+}
+
 // OK returns true if the status is OK.
 func (r *Result) OK() bool {
 	return r.Status == string(OK)
